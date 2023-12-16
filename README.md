@@ -1,2 +1,5 @@
 # HTTP-Server-from-scratch
-Learn Rust by Building Real Applications
+This is my piratical project while learning rust. This project is all about using
+- TCP/IP
+- Accept incoming transactions
+- Serving some HTTP content file 
