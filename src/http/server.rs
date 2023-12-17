@@ -1,9 +1,17 @@
+mod properties;
+
 use std::io::Read;
 use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::convert::TryFrom;
+use std::convert::TryInto;
+use std::str;
+
+use super::request::Request;
+use properties::ServerProperties;
 
 #[derive(Debug)]
 pub struct Server {
-    pub socket_addr: SocketAddr,
+    pub socket_addr: SocketAddr
 }
 
 impl Server {
@@ -22,22 +30,36 @@ impl Server {
             Ok(listen) => {
                 println!("Server is listening on {}", &self.socket_addr);
                 loop {
-                    if let Ok((mut tcp_stream, socket_addr)) = listen.accept() {
-                        // Crate a space to read data from stream
-                        // For now, limit is 1kb.
-                        // For production ready server we have to be smarter than this.
-                        let mut raw_buffer = [0; 1024];
+                    if let Ok((mut tcp_stream, _)) = listen.accept() {
 
-                        if let Ok(_) = tcp_stream.read(&mut raw_buffer) {
-                            println!("{}", String::from_utf8_lossy(&raw_buffer));
-                        }
-                        else {
-                            println!("Failed to read from incoming connection");
-                        }
+                        // Crate a space to read data from stream
+                        // For now, limit is 1KB.
+                        // For production ready server we have to be smarter than this.
+                        let mut raw_buffer = [0; Server::BUFFER_SIZE];
+
+                        self.handle_request(&mut raw_buffer, &mut tcp_stream);
                     }
                 }
             },
             Err(e) => println!("Error occur: {}", e),
+        }
+    }
+
+    fn handle_request(&self, buffer: &mut [u8], tcp_stream: &mut TcpStream) {
+        if let Ok(_) = tcp_stream.read(buffer) {
+            println!("{}", String::from_utf8_lossy(buffer));
+
+            // let result: Result<Request, String> = buffer.try_into();
+            match Request::try_from(buffer as &[u8]) {
+                Ok(request) => {
+                },
+                Err(e) => println!("Error while parsing raw_bytes to Request. Reason {}", e),
+            }
+
+
+        }
+        else {
+            println!("Failed to read from incoming connection");
         }
     }
 }
