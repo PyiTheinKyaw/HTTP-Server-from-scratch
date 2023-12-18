@@ -3,8 +3,6 @@ mod properties;
 use std::io::Read;
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::convert::TryFrom;
-use std::convert::TryInto;
-use std::str;
 
 use super::request::Request;
 use properties::ServerProperties;
@@ -15,6 +13,7 @@ pub struct Server {
 }
 
 impl Server {
+
     pub fn new(addr: String, port: u16) -> Self {
         Server {
             socket_addr: SocketAddr::new(addr.parse().unwrap(), port)

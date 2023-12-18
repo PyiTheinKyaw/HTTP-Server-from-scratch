@@ -1,9 +1,8 @@
 use std::error::Error;
-use std::fmt::{Display, Formatter, write};
-use std::fmt::Result as FmtResult;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::str::Utf8Error;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ParseError {
     InvalidRequest,
     InvalidEncoding,
