@@ -3,7 +3,7 @@ pub trait StringParser {
     fn separate_query(&mut self) -> Option<String>;
 
     fn get_query(&self) -> Option<&str>;
-    fn trim_path(&mut self);
+    fn trim_path(&self) -> Option<&str>;
 }
 
 impl StringParser for &str {
@@ -33,9 +33,11 @@ impl StringParser for &str {
         None
     }
 
-    fn trim_path(&mut self){
+    fn trim_path(&self) -> Option<&str> {
         if let Some(index) = self.find('?') {
-            *self = &self[..index];
+            return Some(&self[..index]);
         }
+
+        Some(self)
     }
 }

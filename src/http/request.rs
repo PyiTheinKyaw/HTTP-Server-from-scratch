@@ -9,7 +9,6 @@ pub struct Request<'buff> {
     pub method: Methods,
     pub path: &'buff str,
     pub query: Option<&'buff str>,
-
 }
 
 impl<'buff> TryFrom<&[u8]> for Request<'buff> {
@@ -18,7 +17,6 @@ impl<'buff> TryFrom<&[u8]> for Request<'buff> {
     fn try_from(buff: &[u8]) -> Result<Self, Self::Error> {
 
         // After Impl From Trait
-        // ? = Observe on Result<T,E> if T assign to variable if E return it
         let raw_str = str::from_utf8(buff)?;
 
         let (method, raw_str) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
@@ -32,9 +30,9 @@ impl<'buff> TryFrom<&[u8]> for Request<'buff> {
         let method = method.parse::<Methods>()?;
 
         let query = path.get_query();
-        path.trim_path();
+        let path = path.trim_path().unwrap();
 
-        return Ok(Request {
+        return Ok(Self {
             method,
             path,
             query
@@ -87,15 +85,12 @@ mod tests {
 
     #[test]
     fn test_trim_path() {
-        let mut path = "/home?key1=value&key2=value2";
+        let path = "/home?key1=value&key2=value2";
 
         let expected_home = "/home";
 
-        path.trim_path();
-        assert_eq!(expected_home, path);
-        assert_eq!(None, path.get_query());
-
-        assert!(true);
+       let path = path.trim_path().unwrap();
+       assert_eq!(expected_home, path);
     }
 }
 
