@@ -1,5 +1,9 @@
 pub trait StringParser {
     fn get_next_word(&self) -> Option<(&str, &str)>;
+    fn separate_query(&mut self) -> Option<String>;
+
+    fn get_query(&self) -> Option<&str>;
+    fn trim_path(&mut self);
 }
 
 impl StringParser for &str {
@@ -10,5 +14,28 @@ impl StringParser for &str {
             }
         }
         None
+    }
+
+    fn separate_query(&mut self) -> Option<String> {
+        if let Some(index) = self.find('?') {
+            let query = self[index + 1..].to_string();
+            *self = &self[..index];
+
+            return Some(query);
+        }
+        None
+    }
+
+    fn get_query(&self) -> Option<&str> {
+        if let Some(index) = self.find('?') {
+            return Some(&self[index+1..]);
+        }
+        None
+    }
+
+    fn trim_path(&mut self){
+        if let Some(index) = self.find('?') {
+            *self = &self[..index];
+        }
     }
 }

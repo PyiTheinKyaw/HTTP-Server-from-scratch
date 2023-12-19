@@ -51,11 +51,10 @@ impl Server {
             // let result: Result<Request, String> = buffer.try_into();
             match Request::try_from(buffer as &[u8]) {
                 Ok(request) => {
+                    println!("{:?}", request);
                 },
                 Err(e) => println!("Error while parsing raw_bytes to Request. Reason {}", e),
             }
-
-
         }
         else {
             println!("Failed to read from incoming connection");
