@@ -11,17 +11,16 @@ pub struct Request<'buff> {
     pub query: Option<&'buff str>,
 }
 
-impl<'buff> TryFrom<&[u8]> for Request<'buff> {
+impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
     type Error = ParseError;
 
-    fn try_from(buff: &[u8]) -> Result<Self, Self::Error> {
+    fn try_from(buffer: &'buff [u8]) -> Result<Self, Self::Error> {
 
-        // After Impl From Trait
-        let raw_str = str::from_utf8(buff)?;
+        let raw_str = str::from_utf8(buffer)?;
 
-        let (method, raw_str) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
-        let (mut path, raw_str) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
-        let (protocol_version, _) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        let (method, path) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        let (path_query, protocol_version) = path.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        let (protocol_version, _) = protocol_version.get_next_word().ok_or(ParseError::InvalidRequest)?;
 
         if protocol_version != "HTTP/1.1" {
             return Err(ParseError::InvalidProtocol);
@@ -29,8 +28,8 @@ impl<'buff> TryFrom<&[u8]> for Request<'buff> {
 
         let method = method.parse::<Methods>()?;
 
-        let query = path.get_query();
-        let path = path.trim_path().unwrap();
+        let query = path_query.get_query();
+        let path = path_query.trim_path().unwrap();
 
         return Ok(Self {
             method,

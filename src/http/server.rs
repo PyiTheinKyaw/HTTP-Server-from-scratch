@@ -46,7 +46,6 @@ impl Server {
 
     fn handle_request(&self, buffer: &mut [u8], tcp_stream: &mut TcpStream) {
         if let Ok(_) = tcp_stream.read(buffer) {
-            println!("{}", String::from_utf8_lossy(buffer));
 
             // let result: Result<Request, String> = buffer.try_into();
             match Request::try_from(buffer as &[u8]) {
