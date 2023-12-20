@@ -16,26 +16,39 @@ impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
 
     fn try_from(buffer: &'buff [u8]) -> Result<Self, Self::Error> {
 
+        // 1. Parse the raw bytes into a string slice:
         let raw_str = str::from_utf8(buffer)?;
 
-        let (method, path) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
-        let (path_query, protocol_version) = path.get_next_word().ok_or(ParseError::InvalidRequest)?;
-        let (protocol_version, _) = protocol_version.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        // 2. Use StringParser methods to extract request components:
+        let (method_str, raw_str) = raw_str.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        let method = method_str.parse::<Methods>()?;
+        let path = raw_str.trim_path().ok_or(ParseError::InvalidRequest)?;
+        let query = raw_str.get_query();
 
-        if protocol_version != "HTTP/1.1" {
-            return Err(ParseError::InvalidProtocol);
-        }
-
-        let method = method.parse::<Methods>()?;
-
-        let query = path_query.get_query();
-        let path = path_query.trim_path().unwrap();
-
-        return Ok(Self {
+        // 3. Create and return the Request instance:
+        Ok(Request {
             method,
             path,
-            query
-        });
+            query,
+        })
+
+        // let (path_query, raw_protocol) = path_raw.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        // let (protocol_version, _) = raw_protocol.get_next_word().ok_or(ParseError::InvalidRequest)?;
+        //
+        // if protocol_version != "HTTP/1.1" {
+        //     return Err(ParseError::InvalidProtocol);
+        // }
+        //
+        // let method = method.parse::<Methods>()?;
+        //
+        // let query = path_query.get_query();
+        // let path = path_query.trim_path().unwrap();
+        //
+        // return Ok(Self {
+        //     method,
+        //     path,
+        //     query
+        // });
     }
 }
 
