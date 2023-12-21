@@ -64,16 +64,14 @@ ensure smooth program execution.
  */
 fn convert<'a>(buffer: &'a [u8]) -> Option<(&'a str, &'a str)> {
     // let mut rets = None;
-    if let Ok(ret) = str::from_utf8(buffer) {
-         return ret.get_next_word();
-        // return get_get(ret);
-    }
+    // if let Ok(ret) = str::from_utf8(buffer) {
+    //      return ret.get_next_word();
+    // }
+    //
+    // Some((&"HELLO", &"WORLD"))
 
-    Some((&"HELLO", &"WORLD"))
-
-
-    // let ret = str::from_utf8(buffer);
-    // ret
+     let ret = str::from_utf8(buffer).ok()?;
+    get_get(ret)
 }
 
 fn get_get<'a>(v: &'a str) -> Option<(&'a str, &'a str)>{
