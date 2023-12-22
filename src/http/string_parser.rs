@@ -1,12 +1,10 @@
-pub trait StringParser {
-    fn get_next_word(&self) -> Option<(&str, &str)>;
-
-    fn get_query(&self) -> Option<&str>;
-    fn trim_path(&self) -> Option<&str>;
+pub trait StringParser<'a> {
+    fn get_next_word(&self) -> Option<(&'a str, &'a str)>;
+    fn get_path_query(&self) -> Option<(&'a str, &'a str)>;
 }
 
-impl StringParser for &str {
-    fn get_next_word(&self) -> Option<(&str, &str)>{
+impl<'a> StringParser<'a> for &'a str {
+    fn get_next_word(&self) -> Option<(&'a str, &'a str)>{
         for (i,c) in self.chars().enumerate() {
             if c == ' ' || c == '\r' {
                 return Some((&self[..i], &self[i+1..]));
@@ -15,18 +13,10 @@ impl StringParser for &str {
         None
     }
 
-    fn get_query(&self) -> Option<&str> {
+    fn get_path_query(&self) -> Option<(&'a str, &'a str)> {
         if let Some(index) = self.find('?') {
-            return Some(&self[index+1..]);
+            return Some((&self[..index], &self[index+1..]))
         }
         None
-    }
-
-    fn trim_path(&self) -> Option<&str> {
-        if let Some(index) = self.find('?') {
-            return Some(&self[..index]);
-        }
-
-        Some(self)
     }
 }

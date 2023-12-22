@@ -1,39 +1,28 @@
 use std::str;
-use std::str::Utf8Error;
 
 pub trait StringParser<'a> {
-    fn get_next_word(&self) -> Option<(&str, &str)>;
-    fn get_query(&self) -> Option<&str>;
-    fn trim_path(&self) -> Option<&str>;
+    fn get_next_word(&self) -> Option<(&'a str, &'a str)>;
+    fn get_path_query(&self) -> Option<(&'a str, &'a str)>;
 }
 
 impl<'a> StringParser<'a> for &'a str {
     fn get_next_word(&self) -> Option<(&'a str, &'a str)>{
         for (i,c) in self.chars().enumerate() {
             if c == ' ' || c == '\r' {
-                return Some(
-                    (&self[..i], &self[i+1..])
-                );
+                return Some((&self[..i], &self[i+1..]));
             }
         }
         None
     }
 
-    fn get_query(&self) -> Option<&str> {
+    fn get_path_query(&self) -> Option<(&'a str, &'a str)> {
         if let Some(index) = self.find('?') {
-            return Some(&self[index+1..]);
+            return Some((&self[..index], &self[index+1..]))
         }
         None
     }
-
-    fn trim_path(&self) -> Option<&str> {
-        if let Some(index) = self.find('?') {
-            return Some(&self[..index]);
-        }
-
-        Some(self)
-    }
 }
+
 fn main() {
     let buffer = &[
         0x47, 0x45, 0x54, 0x20, 0x2f, 0x68, 0x6f, 0x6d, 0x65, 0x3f, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f,
@@ -42,43 +31,23 @@ fn main() {
         0x20, 0x48, 0x54, 0x54, 0x50, 0x2f, 0x31, 0x2e, 0x31
     ];
 
-    let ret = convert(buffer);
-
-    println!("Return String: {:?}", ret);
+    let(method, path, query) = convert(buffer);
+    println!("Method: {}, Path:{}, Query: {:?}", method, path, query);
 }
 
-/*
-** The Resilience of Language **
+fn convert<'a>(buffer: &'a [u8]) -> (&'a str, &'a str, Option<&'a str>) {
+    let converted_str = str::from_utf8(buffer).unwrap();
 
-Isn't it fascinating how even with all these typos, you can still understand me?
-It's a testament to the remarkable human ability to interpret and
-fill in the gaps, highlighting the inherent flexibility and resilience of language.
+    let (method, raw_str) = converted_str.get_next_word().unwrap();
+    let (mut path, protocol_version) = raw_str.get_next_word().unwrap();
 
-** Addressing Borrowed Ownership **
-Now, onto a different kind of gap – the one posed by borrowed ownership in Rust.
-I'm currently grappling with finding solutions to circumvent
-the need for explicit unwrapping with unwrap(), ok_or, and similar methods.
+    println!("Protocol version: {:?}", protocol_version);
 
-The goal is to find cleaner, more elegant ways to handle potential ownership errors and
-ensure smooth program execution.
- */
-fn convert<'a>(buffer: &'a [u8]) -> Option<(&'a str, &'a str)> {
-    // let mut rets = None;
-    // if let Ok(ret) = str::from_utf8(buffer) {
-    //      return ret.get_next_word();
-    // }
-    //
-    // Some((&"HELLO", &"WORLD"))
-
-     let ret = str::from_utf8(buffer).ok()?;
-    get_get(ret)
-}
-
-fn get_get<'a>(v: &'a str) -> Option<(&'a str, &'a str)>{
-    for (i,c) in v.chars().enumerate() {
-        if c == ' ' || c == '\r' {
-            return Some((&v[..i], &v[i+1..]));
-        }
+    let mut query = None;
+    if let Some((_path, _query)) = path.get_path_query() {
+        query = Some(_query);
+        path = _path;
     }
-    None
+
+    (method, path, query)
 }
