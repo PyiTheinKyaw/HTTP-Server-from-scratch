@@ -1,6 +1,7 @@
 pub trait StringParser<'a> {
     fn get_next_word(&self) -> Option<(&'a str, &'a str)>;
     fn get_path_query(&self) -> Option<(&'a str, &'a str)>;
+
 }
 
 impl<'a> StringParser<'a> for &'a str {

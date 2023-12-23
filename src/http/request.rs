@@ -78,27 +78,5 @@ mod tests {
 
         assert!(true);
     }
-
-    #[test]
-    fn test_get_query() {
-        let path = "/home?key1=value&key2=value2";
-
-        let expected_query = Some("key1=value&key2=value2");
-
-        let query = path.get_query();
-        assert_eq!(expected_query, query);
-
-        assert!(true);
-    }
-
-    #[test]
-    fn test_trim_path() {
-        let path = "/home?key1=value&key2=value2";
-
-        let expected_home = "/home";
-
-       let path = path.trim_path().unwrap();
-       assert_eq!(expected_home, path);
-    }
 }
 
