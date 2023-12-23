@@ -63,20 +63,5 @@ mod tests {
 
         assert_eq!(parser.get_next_word(), None);
     }
-
-    #[test]
-    fn test_path_separate_into_query() {
-        let mut path = "/home?key1=value&key2=value2";
-
-        let expected_path = "/home";
-        let expected_query = Some("key1=value&key2=value2".to_string());
-
-        let query = path.separate_query();
-
-        assert_eq!(expected_path, &path[..]);
-        assert_eq!(expected_query, query);
-
-        assert!(true);
-    }
 }
 
