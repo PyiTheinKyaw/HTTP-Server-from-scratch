@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 use std::fmt::{Display, format, Formatter, Result as FmtResult};
 
+#[derive(Debug)]
 pub struct QueryString<'query> {
     data: HashMap<&'query str, Value<'query>>,
 }
 
+#[derive(PartialEq, Debug)]
 enum Value<'value> {
     Single(&'value str),
     Multiple(Vec<&'value str>)
@@ -64,8 +66,8 @@ mod query_string_test {
         let qs = "key1=value1&key2=value2";
         let query_string = QueryString::from(qs);
 
-        assert_eq!(query_string.get("key1"), Some(Value::Single("value1")));
-        assert_eq!(query_string.get("key2"), Some(Value::Single("value2")));
+        assert_eq!(query_string.get("key1"), Some(&Value::Single("value1")));
+        assert_eq!(query_string.get("key2"), Some(&Value::Single("value2")));
         assert_eq!(query_string.get("key3"), None);
     }
 
@@ -74,7 +76,7 @@ mod query_string_test {
         let qs = "key=value1&key=value2";
         let query_string = QueryString::from(qs);
 
-        assert_eq!(query_string.get("key"), Some(Value::Multiple(vec!["value1", "value2"])));
+        assert_eq!(query_string.get("key"), Some(&Value::Multiple(vec!["value1", "value2"])));
     }
 
     #[test]
@@ -82,7 +84,7 @@ mod query_string_test {
         let qs = "key=%20value%20with%20spaces";
         let query_string = QueryString::from(qs);
 
-        assert_eq!(query_string.get("key"), Some(Value::Single(" value with spaces")));
+        assert_eq!(query_string.get("key"), Some(&Value::Single(" value with spaces")));
     }
 
 }

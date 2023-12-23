@@ -4,12 +4,13 @@ use super::string_parser::StringParser;
 
 
 use std::str;
+use crate::http::query_string::QueryString;
 
 #[derive(Debug)]
 pub struct Request<'buff> {
     pub method: Methods,
     pub path: &'buff str,
-    pub query: Option<&'buff str>,
+    pub query: Option<QueryString<'buff>>,
 }
 
 impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
@@ -39,11 +40,17 @@ impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
 
         let http_method = method.parse::<Methods>()?;
 
+        let mut query_string= None;
+        if let Some(qs) = query {
+            query_string = Some(QueryString::from(qs));
+        }
+
+
         // 3. Create and return the Request instance:
         Ok(Request {
             method: http_method,
             path,
-            query,
+            query: query_string
         })
     }
 }
