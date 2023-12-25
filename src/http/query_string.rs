@@ -1,7 +1,7 @@
 use std::collections::HashMap;
-use std::fmt::{Display, format, Formatter, Result as FmtResult};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct QueryString<'query> {
     data: HashMap<&'query str, Value<'query>>,
 }
@@ -12,6 +12,7 @@ enum Value<'value> {
     Multiple(Vec<&'value str>)
 }
 
+#[allow(dead_code)]
 impl<'query> QueryString<'query> {
     fn get(&self, key: &str) -> Option<&'query Value> {
         self.data.get(key)

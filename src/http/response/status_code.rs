@@ -7,7 +7,6 @@ pub enum StatusCode {
     NotFound = 404,
 }
 
-
 impl StatusCode {
     pub fn reason_phrase(&self) -> &str {
         match self {

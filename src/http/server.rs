@@ -1,7 +1,7 @@
 mod properties;
 
-use std::io::{Read, Write};
-use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::io::{Read};
+use std::net::{SocketAddr, TcpListener};
 use std::convert::TryFrom;
 
 use super::request::Request;
@@ -24,11 +24,13 @@ impl Server {
     /*
     This function will listen on given address and port.
      */
-    pub fn run<'a>(self, handler: impl HTTPHandler<'a>) {
+    pub fn run(self, handler: impl HTTPHandler) {
         // let listen = TcpListener::bind(self.get_address()).unwrap();
         match TcpListener::bind(self.socket_addr) {
             Ok(listen) => {
-                println!("Server is listening on {}", &self.socket_addr);
+                println!("Server is listening on http://{}", &self.socket_addr);
+                println!("By default: / and /index will take you index.html");
+
                 loop {
                     if let Ok((mut tcp_stream, _)) = listen.accept() {
 
@@ -37,30 +39,22 @@ impl Server {
                         // For production ready server we have to be smarter than this.
                         let mut raw_buffer = [0; Server::BUFFER_SIZE];
 
-                        if let Ok(_) = tcp_stream.read(&mut raw_buffer) {
+                        match tcp_stream.read(&mut raw_buffer) {
 
-                            // let result: Result<Request, String> = buffer.try_into();
-                            let response = match Request::try_from(&raw_buffer[..]) {
+                            Ok(_) => {
+                                // let result: Result<Request, String> = buffer.try_into();
+                                let response = match Request::try_from(&raw_buffer[..]) {
+                                    Ok(request) => handler.handle_request(request),
+                                    Err(e) => handler.handle_bad_request(&e),
+                                };
 
-                                Ok(request) => {
-                                    handler.handle_request(request)
-                                },
-                                Err(e) => {
-                                    println!("Error happen while converting buffer to Request. Reason: {}", e);
-                                    handler.handle_bad_request()
-                                },
-                            };
-
-                            if let Err(e) = response.send(&mut tcp_stream) {
-                                println!("Error while parsing raw_bytes to Request. Reason {}", e)
-                            }
-                        }
-                        else {
-                            println!("Failed to read from incoming connection");
+                                if let Err(e) = response.send(&mut tcp_stream) {
+                                    println!("Error while parsing raw_bytes to Request. Reason: {}", e)
+                                }
+                            },
+                            Err(e) => println!("Failed to read from incoming stream. Reason: {}", e)
                         }
                     }
-
-
                 }
             },
             Err(e) => println!("Error occur: {}", e),

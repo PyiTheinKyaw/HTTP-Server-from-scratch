@@ -1,21 +1,19 @@
-use std::fmt::Display;
 use std::io::{Result as IoResult, Write};
-use std::net::TcpStream;
+use crate::http::response::properties::ResponseProperties;
 use super::response::status_code::StatusCode;
 
 pub mod status_code;
+mod properties;
 
 #[derive(Debug)]
-pub struct Response<'res> {
+pub struct Response {
     status_code: StatusCode,
-    server: &'res str,
-    protocol_version: &'res str,
     body: Option<String>,
 }
 
-impl<'res> Response<'res> {
-    pub fn new(status_code: StatusCode, server: &'res str, protocol_version: &'res str, body: Option<String>) -> Self {
-        Self { status_code, server, protocol_version, body}
+impl Response {
+    pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
+        Self { status_code, body}
     }
 
     pub fn send(&self, tcp_stream: &mut impl Write) -> IoResult<()> {
@@ -30,13 +28,18 @@ impl<'res> Response<'res> {
             Server: {}\r\n
             \r\n\
             {}",
-           self.protocol_version,
+           Self::PROTOCOL_VERSION,
            self.status_code,
            self.status_code.reason_phrase(),
-           self.server,
+           Self::SERVER_NAME,
            body
         )
     }
+}
+
+impl<'rp> ResponseProperties<'rp> for Response {
+    const SERVER_NAME: &'rp str = "OuOu";
+    const PROTOCOL_VERSION: &'rp str = "HTTP/1.1";
 }
 
 #[cfg(test)]

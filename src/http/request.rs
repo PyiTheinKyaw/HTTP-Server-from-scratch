@@ -8,9 +8,9 @@ use crate::http::query_string::QueryString;
 
 #[derive(Debug)]
 pub struct Request<'buff> {
-    pub method: Methods,
-    pub path: &'buff str,
-    pub query: Option<QueryString<'buff>>,
+    method: Methods,
+    path: &'buff str,
+    query: Option<QueryString<'buff>>,
 }
 
 impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
@@ -52,6 +52,15 @@ impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
             path,
             query: query_string
         })
+    }
+}
+
+impl<'buff> Request<'buff> {
+    pub fn method(&self) -> &Methods { &self.method }
+    pub fn path(&self) -> &str { &self.path }
+
+    pub fn query(&self) -> Option<&QueryString<'buff>> {
+        self.query.as_ref()
     }
 }
 
