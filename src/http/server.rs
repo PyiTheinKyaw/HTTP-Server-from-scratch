@@ -1,6 +1,6 @@
 mod properties;
 
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::convert::TryFrom;
 
@@ -51,6 +51,7 @@ impl Server {
             match Request::try_from(buffer as &[u8]) {
                 Ok(request) => {
                     println!("{:?}", request);
+                    write!(tcp_stream, "HTTP/1.1 404 NOT FOUND>>>>>>>");
                 },
                 Err(e) => println!("Error while parsing raw_bytes to Request. Reason {}", e),
             }
