@@ -1,8 +1,12 @@
+use std::fmt::{Display, Formatter};
+
+#[derive(Debug, Copy, Clone)]
 pub enum StatusCode {
     Ok = 200,
     BadRequest = 400,
     NotFound = 404,
 }
+
 
 impl StatusCode {
     pub fn reason_phrase(&self) -> &str {
@@ -14,13 +18,8 @@ impl StatusCode {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::http::response::status_code::StatusCode;
-
-    #[test]
-    fn test_status_code() {
-        StatusCode::Ok.reason_phrase();
-        assert!(true);
+impl Display for StatusCode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", *self as u16)
     }
 }
